@@ -1,0 +1,403 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import { SPECS } from '../constants/pachinkoSpecs';
+
+export type GameState = 'NORMAL' | 'RUSH';
+export type SubState = 'IDLE' | 'SPINNING' | 'PRE_WIN_CINEMATIC' | 'WIN_PRESENTATION' | 'CHARGE';
+
+export interface SpinInfo {
+  isWin: boolean;
+  isReach: boolean;
+  finalReels: string[];
+}
+
+export interface WinInfo {
+  type: string;
+  payout: number;
+  nextState: GameState;
+  isCinematic?: boolean;
+  isCharge?: boolean;
+}
+
+export function usePachinko() {
+  const [gameState, setGameState] = useState<GameState>('NORMAL');
+  const [subState, setSubState] = useState<SubState>('IDLE');
+  
+  // Game stats
+  const [balls, setBalls] = useState(1000);
+  const [reserve, setReserve] = useState(0); // 保留 (max 4)
+  const [spins, setSpins] = useState(0); // 通常時の回転数
+  const [rushSpins, setRushSpins] = useState(0); // RUSH中の回転数 (max 130)
+  
+  // Current session stats
+  const [currentStreak, setCurrentStreak] = useState(0);
+  const [totalPayout, setTotalPayout] = useState(0);
+  const [money, setMoney] = useState(10000); // 1万円からスタート
+  
+  // Win info for presentation
+  const [winInfo, setWinInfo] = useState<WinInfo | null>(null);
+  
+  // Current spin info
+  const [spinInfo, setSpinInfo] = useState<SpinInfo | null>(null);
+
+  // User presentation triggers (hooks for UI animations)
+  const [presentationTrigger, setPresentationTrigger] = useState<number>(0);
+  const [isReadyForNextSpin, setIsReadyForNextSpin] = useState(true);
+
+  const [autoShoot, setAutoShoot] = useState(false);
+
+  const toggleAutoShoot = useCallback(() => {
+    setAutoShoot(prev => !prev);
+  }, []);
+
+  const [speedMode, setSpeedMode] = useState<0 | 1 | 2>(0);
+  const savedSpeedModeRef = React.useRef<0 | 1 | 2 | null>(null);
+  const [autoLend, setAutoLend] = useState(false);
+
+  const toggleSpeed = useCallback(() => {
+    setSpeedMode(prev => (prev + 1) % 3 as 0 | 1 | 2);
+  }, []);
+
+  const toggleAutoLend = useCallback(() => {
+    setAutoLend(prev => !prev);
+  }, []);
+
+  // 台の釘状態（±5%のランダムなブレをページロード時に決定）
+  const [nailState] = useState(() => {
+    const variance = 0.95 + Math.random() * 0.1; // 0.95 to 1.05
+    return variance;
+  });
+
+  // Shoot a ball into the start hole
+  const shoot = useCallback(() => {
+    // 演出中（WIN_PRESENTATION, PRE_WIN_CINEMATIC, CHARGE等）は打ち出し無効
+    if (subState !== 'IDLE' && subState !== 'SPINNING') return;
+    
+    // 保留が4個（満タン）の場合は打ち出しを停止（保留止め）
+    if (reserve >= 4) return;
+
+    setBalls((prev) => {
+      if (prev <= 0) return 0;
+      
+      let actualProb;
+      if (gameState === 'RUSH') {
+        // ラッシュ中（右打ち）は電チューが開くため、100%入賞する
+        actualProb = 1.0;
+      } else {
+        // 1000円(250玉)で平均ベース確率
+        const baseProb = SPECS.BASE_SPINS_PER_1000YEN / 250;
+        actualProb = baseProb * nailState;
+      }
+
+      // チャッカー入賞判定
+      if (Math.random() < actualProb) {
+        setReserve((r) => Math.min(r + 1, 4));
+      }
+      return prev - 1;
+    });
+  }, [subState, nailState, gameState, reserve]);
+
+  // Auto shooting loop
+  useEffect(() => {
+    let interval: number;
+    // 稼働条件：IDLEまたはSPINNINGの時のみ。
+    if (autoShoot && (subState === 'IDLE' || subState === 'SPINNING')) {
+      const shootInterval = speedMode === 2 ? 50 : speedMode === 1 ? 200 : 600;
+      interval = window.setInterval(() => {
+        if (balls <= 0) {
+          if (autoLend && money >= 500) {
+            setMoney(m => m - 500);
+            setBalls(b => b + 125);
+          }
+        } else if (reserve < 4) {
+          shoot();
+        }
+      }, shootInterval);
+    }
+    return () => clearInterval(interval);
+  }, [autoShoot, balls, subState, shoot, speedMode, autoLend, money, reserve]);
+
+  const spinTimerRef = React.useRef<number | null>(null);
+
+  // Main game loop
+  useEffect(() => {
+    const processSpin = () => {
+      if (subState !== 'IDLE' || reserve === 0 || !isReadyForNextSpin) return;
+
+      // Start spinning
+      setSubState('SPINNING');
+      setReserve((prev) => prev - 1);
+      setIsReadyForNextSpin(false);
+
+      let nextRushSpins = rushSpins;
+      if (gameState === 'NORMAL') {
+        setSpins((prev) => prev + 1);
+      } else {
+        nextRushSpins += 1;
+        setRushSpins(nextRushSpins);
+      }
+
+      // Roll RNG
+      let isWin = false;
+      let isCharge = false;
+      let isReach = false;
+      let nextWinInfo: WinInfo | null = null;
+      let finalReels = ['1', '2', '3'];
+
+      if (gameState === 'NORMAL') {
+        isWin = Math.random() < 1 / SPECS.NORMAL_PROBABILITY;
+        isCharge = !isWin && Math.random() < 1 / SPECS.CHARGE_PROBABILITY;
+        
+        if (isWin) {
+          isReach = true;
+          if (Math.random() < 0.5) {
+            nextWinInfo = { type: 'RUSH_ENTRY', payout: SPECS.PAYOUT_1500, nextState: 'RUSH', isCinematic: true };
+            finalReels = ['7', '7', '7'];
+          } else {
+            nextWinInfo = { type: 'NORMAL_WIN', payout: SPECS.PAYOUT_1500, nextState: 'NORMAL', isCinematic: false };
+            finalReels = ['3', '3', '3'];
+          }
+        } else if (isCharge) {
+          nextWinInfo = { type: 'CHARGE', payout: SPECS.PAYOUT_CHARGE, nextState: 'NORMAL', isCharge: true };
+          finalReels = ['1', '3', '5']; // リーチなどの演出なし
+        } else {
+          isReach = Math.random() < 0.05;
+          if (isReach) {
+            const reachNumber = Math.floor(Math.random() * 9) + 1;
+            const missNumber = (reachNumber % 9) + 1;
+            finalReels = [reachNumber.toString(), missNumber.toString(), reachNumber.toString()];
+          } else {
+            finalReels = [
+              (Math.floor(Math.random() * 9) + 1).toString(),
+              (Math.floor(Math.random() * 9) + 1).toString(),
+              (Math.floor(Math.random() * 9) + 1).toString()
+            ];
+            if (finalReels[0] === finalReels[2] || (finalReels[0] === finalReels[1] && finalReels[1] === finalReels[2])) {
+              finalReels[1] = ((parseInt(finalReels[1]) % 9) + 1).toString();
+            }
+          }
+        }
+      } else {
+        isWin = Math.random() < 1 / SPECS.RUSH_PROBABILITY;
+        if (isWin) {
+          isReach = true;
+          if (Math.random() < 0.03) {
+            nextWinInfo = { type: 'RUSH_6000', payout: SPECS.PAYOUT_6000, nextState: 'RUSH', isCinematic: false };
+            finalReels = ['7', '7', '7'];
+          } else {
+            nextWinInfo = { type: 'RUSH_3000', payout: SPECS.PAYOUT_3000, nextState: 'RUSH', isCinematic: false };
+            finalReels = ['3', '3', '3'];
+          }
+        } else {
+          finalReels = [
+            (Math.floor(Math.random() * 9) + 1).toString(),
+            (Math.floor(Math.random() * 9) + 1).toString(),
+            (Math.floor(Math.random() * 9) + 1).toString()
+          ];
+          if (finalReels[0] === finalReels[1] && finalReels[1] === finalReels[2]) {
+            finalReels[2] = ((parseInt(finalReels[2]) % 9) + 1).toString();
+          }
+        }
+      }
+      
+      setSpinInfo({ isWin, isReach, finalReels });
+      if (nextWinInfo) {
+        setWinInfo(nextWinInfo);
+      }
+      
+      // Simulate spin duration
+      let spinDuration = isWin ? 4000 : isReach ? 3000 : 1000; 
+      if (speedMode === 1) spinDuration = isWin ? 2000 : isReach ? 1500 : 500;
+      if (speedMode === 2) spinDuration = isWin ? 500 : isReach ? 300 : 100;
+      if (isCharge) spinDuration = 500; // チャージは高速
+      
+      // 演出が来たときは倍速を解除して通常速度に戻す
+      if (isWin || isCharge) {
+        if (speedMode > 0) {
+          savedSpeedModeRef.current = speedMode;
+        }
+        setSpeedMode(0);
+      }
+      
+      if (spinTimerRef.current !== null) {
+        clearTimeout(spinTimerRef.current);
+      }
+      
+      spinTimerRef.current = window.setTimeout(() => {
+        if (isWin) {
+          if (gameState === 'NORMAL' && nextWinInfo?.isCinematic) {
+            setSubState('PRE_WIN_CINEMATIC');
+            setTimeout(() => {
+              handleWin(gameState, nextWinInfo);
+            }, 17500);
+          } else {
+            handleWin(gameState, nextWinInfo);
+          }
+        } else if (isCharge) {
+          setSubState('CHARGE');
+          setWinInfo(nextWinInfo);
+          setTimeout(() => {
+            setBalls((prev) => prev + (nextWinInfo?.payout || 0));
+            setTotalPayout((prev) => prev + (nextWinInfo?.payout || 0));
+            setSubState('IDLE');
+            setWinInfo(null);
+            if (savedSpeedModeRef.current !== null) {
+              setSpeedMode(savedSpeedModeRef.current);
+              savedSpeedModeRef.current = null;
+            }
+          }, 3000);
+        } else {
+          handleLose(gameState, nextRushSpins);
+        }
+      }, spinDuration);
+    };
+
+    if (subState === 'IDLE' && reserve > 0 && isReadyForNextSpin) {
+      processSpin();
+    }
+  }, [subState, reserve, gameState, rushSpins, isReadyForNextSpin, speedMode]);
+
+  // Clean up on unmount
+  useEffect(() => {
+    return () => {
+      if (spinTimerRef.current !== null) {
+        clearTimeout(spinTimerRef.current);
+      }
+    };
+  }, []);
+
+  const handleWin = (currentState: GameState, winInfoArg?: WinInfo | null) => {
+    setSubState('WIN_PRESENTATION');
+    if (currentState === 'NORMAL') {
+      setCurrentStreak(1);
+      setTotalPayout(0); // 新しい初当たりでリセット
+    } else {
+      setCurrentStreak((prev) => prev + 1);
+    }
+    
+    // 強制大当りなどのためにwinInfoArgがない場合は既存を使う
+    if (winInfoArg) {
+      setWinInfo(winInfoArg);
+    }
+    
+    setPresentationTrigger(Date.now());
+  };
+
+  const handleLose = (currentState: GameState, currentRushSpins: number) => {
+    if (currentState === 'RUSH') {
+      if (currentRushSpins >= SPECS.RUSH_MAX_SPINS) {
+        // RUSH終了
+        setGameState('NORMAL');
+        setRushSpins(0);
+        setCurrentStreak(0);
+      }
+    }
+    const stopDelay = speedMode === 2 ? 50 : 200; // Small delay after reels visually stop
+    setTimeout(() => {
+      setSubState('IDLE');
+      setIsReadyForNextSpin(true);
+    }, stopDelay);
+  };
+
+  // Called by UI when win presentation is over
+  const completeWin = useCallback(() => {
+    if (!winInfo) return;
+    
+    setBalls((prev) => prev + winInfo.payout);
+    setTotalPayout((prev) => prev + winInfo.payout);
+    setGameState(winInfo.nextState);
+    
+    if (winInfo.nextState === 'RUSH') {
+      setRushSpins(0);
+    }
+    
+    setWinInfo(null);
+    setSubState('IDLE');
+    setIsReadyForNextSpin(true);
+    if (savedSpeedModeRef.current !== null) {
+      setSpeedMode(savedSpeedModeRef.current);
+      savedSpeedModeRef.current = null;
+    }
+  }, [winInfo]);
+
+  // For testing/debugging
+  const addBalls = (amount: number) => {
+    if (amount === 125) {
+      if (money < 500) return;
+      setMoney(prev => prev - 500);
+    }
+    setBalls(prev => prev + amount);
+  };
+
+  const earnMoney = (amount: number) => {
+    setMoney(prev => prev + amount);
+  };
+
+  const cashOut = useCallback(() => {
+    if (balls <= 0) return;
+    setMoney(prev => prev + Math.floor(balls * 3.57)); // 28玉交換 (約3.57円/玉)
+    setBalls(0);
+  }, [balls]);
+
+  const forceWin = useCallback((type: 'CINEMATIC' | 'NORMAL' | 'CHARGE' = 'CINEMATIC') => {
+    if (spinTimerRef.current !== null) {
+      clearTimeout(spinTimerRef.current);
+    }
+    
+    if (type === 'CINEMATIC') {
+      const win: WinInfo = { type: 'RUSH_ENTRY', payout: SPECS.PAYOUT_1500, nextState: 'RUSH', isCinematic: true };
+      setWinInfo(win);
+      setSpinInfo({ isWin: true, isReach: true, finalReels: ['7', '7', '7'] });
+      setSubState('PRE_WIN_CINEMATIC');
+      setTimeout(() => {
+        handleWin('NORMAL', win);
+      }, 17500);
+    } else if (type === 'CHARGE') {
+      const win: WinInfo = { type: 'CHARGE', payout: SPECS.PAYOUT_CHARGE, nextState: 'NORMAL', isCharge: true };
+      setWinInfo(win);
+      setSubState('CHARGE');
+      setTimeout(() => {
+        setBalls((prev) => prev + win.payout);
+        setTotalPayout((prev) => prev + win.payout);
+        setSubState('IDLE');
+        setWinInfo(null);
+        if (savedSpeedModeRef.current !== null) {
+          setSpeedMode(savedSpeedModeRef.current);
+          savedSpeedModeRef.current = null;
+        }
+      }, 3000);
+    } else {
+      const win: WinInfo = { type: 'NORMAL_WIN', payout: SPECS.PAYOUT_1500, nextState: 'NORMAL', isCinematic: false };
+      setWinInfo(win);
+      setSpinInfo({ isWin: true, isReach: true, finalReels: ['3', '3', '3'] });
+      setSubState('WIN_PRESENTATION');
+      setPresentationTrigger(Date.now());
+    }
+  }, [gameState]);
+
+  return {
+    gameState,
+    subState,
+    balls,
+    reserve,
+    spins,
+    rushSpins,
+    currentStreak,
+    totalPayout,
+    winInfo,
+    spinInfo,
+    presentationTrigger,
+    autoShoot,
+    toggleAutoShoot,
+    speedMode,
+    toggleSpeed,
+    shoot,
+    completeWin,
+    addBalls,
+    forceWin,
+    money,
+    autoLend,
+    toggleAutoLend,
+    earnMoney,
+    cashOut
+  };
+}

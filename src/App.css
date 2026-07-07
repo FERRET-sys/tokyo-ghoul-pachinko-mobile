@@ -1,0 +1,454 @@
+:root {
+  --primary-color: #6a0dad; /* Purple frame */
+  --screen-bg: #000;
+  --text-light: #fff;
+  --accent-color: #ff0055;
+  --gold: #ffd700;
+}
+
+body, html {
+  margin: 0;
+  padding: 0;
+  background-color: #111;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  color: var(--text-light);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.layout-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  height: 100vh;
+  box-sizing: border-box;
+  padding-bottom: 240px; /* Space for control panel */
+}
+
+/* 筐体全体のコンテナ */
+.machine-container {
+  position: relative;
+  width: auto;
+  max-width: 100%;
+  height: 100%;
+  max-height: calc(100vh - 280px);
+  aspect-ratio: 397 / 628;
+  background: transparent;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.machine-frame-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  z-index: 50; /* Bring above screen area */
+}
+
+/* 液晶画面領域 */
+.screen-area {
+  position: absolute;
+  top: 20%;
+  left: 12%;
+  width: 76%;
+  height: 48%;
+  background-color: var(--screen-bg);
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+/* デジタル液晶内の演出プレースホルダー */
+.screen-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 1;
+}
+
+.screen-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url('https://placehold.co/400x300/222/555?text=Background+Animation') center/cover;
+  opacity: 0.5;
+  z-index: 0;
+}
+
+/* Reel styles moved to Reels.css */
+
+/* スマホ用ステータスバー */
+.mobile-status-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 45px;
+  background: rgba(0,0,0,0.9);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 10px;
+  box-sizing: border-box;
+  z-index: 2000;
+  border-bottom: 1px solid #555;
+}
+
+.mobile-status-bar .hud-title {
+  font-size: 1.1rem;
+  color: var(--gold);
+  font-weight: bold;
+}
+
+.mobile-status-bar .hud-state {
+  font-size: 0.95rem;
+  padding: 4px 8px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+.mobile-status-bar .hud-state.rush {
+  background: rgba(255, 0, 85, 0.7);
+  animation: pulse 1s infinite alternate;
+}
+
+.mobile-status-bar .hud-reserve {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.95rem;
+  font-weight: bold;
+}
+
+.mobile-dev-toggle {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  padding: 0;
+  margin: 0;
+  opacity: 0.5;
+  cursor: pointer;
+}
+
+.mobile-test-menu {
+  position: fixed;
+  top: 45px;
+  left: 0;
+  width: 100%;
+  background: rgba(0,0,0,0.95);
+  z-index: 1900;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 15px 10px;
+  border-bottom: 1px solid #444;
+  box-sizing: border-box;
+}
+
+.mobile-test-menu button {
+  font-size: 0.95rem;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: none;
+  color: white;
+  font-weight: bold;
+}
+
+.mobile-test-menu .red { background: #8b0000; }
+.mobile-test-menu .blue { background: #00008b; }
+.mobile-test-menu .purple { background: #4b0082; }
+
+/* Reserve dots for mobile bar */
+.reserve-container {
+  display: flex;
+  gap: 3px;
+}
+.reserve-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #333;
+  border: 1px solid #555;
+}
+.reserve-dot.active {
+  background: #ff0000;
+  border-color: #ffaaaa;
+  box-shadow: 0 0 5px #ff0000;
+}
+
+/* 喰種チャージ */
+.charge-presentation {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: chargeFadeInOut 3s forwards;
+  pointer-events: none;
+}
+.charge-text {
+  color: #ff00ff;
+  font-size: 3rem; /* Scaled for mobile */
+  font-weight: bold;
+  font-family: 'Noto Serif JP', serif;
+  text-shadow: 0 0 10px #ff00ff, 0 0 20px #800080;
+  text-align: center;
+}
+@keyframes chargeFadeInOut {
+  0% { opacity: 0; transform: scale(0.8); }
+  10% { opacity: 1; transform: scale(1.2); }
+  15% { transform: scale(1.0); }
+  85% { opacity: 1; }
+  100% { opacity: 0; transform: scale(1.1); }
+}
+
+.btn-accent {
+  background: #ff4500;
+  border: 1px solid #ff8c00;
+  color: #fff;
+  box-shadow: 0 0 10px rgba(255, 69, 0, 0.5);
+}
+.btn-accent:hover {
+  background: #ff6347;
+  box-shadow: 0 0 15px rgba(255, 69, 0, 0.8);
+}
+
+.toast-message {
+  position: absolute;
+  top: -80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90vw;
+  max-width: 400px;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.9);
+  color: #fff;
+  padding: 10px 15px;
+  border-radius: 8px;
+  border: 1px solid #ff0000;
+  font-size: 0.9rem;
+  font-family: 'Noto Serif JP', serif;
+  box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+  animation: toast-appear 0.3s ease-out forwards, toast-disappear 0.3s ease-in 2.7s forwards;
+  z-index: 3000;
+  white-space: normal;
+  word-wrap: break-word;
+}
+
+@keyframes toast-appear {
+  from { opacity: 0; transform: translate(-50%, 20px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+@keyframes toast-disappear {
+  from { opacity: 1; transform: translate(-50%, 0); }
+  to { opacity: 0; transform: translate(-50%, -20px); }
+}
+
+.reserve-container {
+  display: flex;
+  gap: 5px;
+}
+
+.reserve-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #333;
+  border: 1px solid #666;
+}
+
+.reserve-dot.active {
+  background: #0f0;
+  box-shadow: 0 0 10px #0f0;
+}
+
+.game-state-label {
+  font-size: 0.9rem;
+  padding: 2px 8px;
+  border-radius: 5px;
+  background: rgba(255,255,255,0.2);
+}
+
+.game-state-label.rush {
+  background: rgba(255, 0, 85, 0.5);
+  color: #fff;
+  animation: pulse 1s infinite alternate;
+}
+
+/* トグルスイッチ（スライドバー） */
+.toggle-switch-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 5px 10px;
+  border-radius: 20px;
+}
+.toggle-label {
+  color: white;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 30px;
+}
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.toggle-switch .slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #555;
+  transition: .4s;
+  border-radius: 30px;
+}
+.toggle-switch .slider:before {
+  position: absolute;
+  content: "";
+  height: 22px;
+  width: 22px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+.toggle-switch input:checked + .slider {
+  background-color: #ff0055;
+}
+.toggle-switch input:checked + .slider:before {
+  transform: translateX(30px);
+}
+
+@keyframes pulse {
+  from { box-shadow: 0 0 5px #ff0055; }
+  to { box-shadow: 0 0 20px #ff0055; }
+}
+
+/* データカウンターと操作部 */
+.control-panel {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 15px;
+  background: rgba(34, 34, 34, 0.95);
+  border-top: 2px solid #444;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 1000;
+  box-sizing: border-box;
+  box-shadow: 0 -5px 15px rgba(0,0,0,0.5);
+  backdrop-filter: blur(5px);
+}
+
+.data-counter {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  gap: 5px;
+  font-family: 'Courier New', Courier, monospace;
+  background: #000;
+  padding: 8px;
+  border-radius: 5px;
+  border: 1px solid #333;
+}
+
+.data-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 65px;
+}
+
+.data-label {
+  font-size: 0.85rem;
+  color: #aaa;
+}
+
+.data-value {
+  font-size: 1.3rem;
+  color: #0f0;
+  text-shadow: 0 0 5px #0f0;
+  font-weight: bold;
+}
+
+.data-value.highlight {
+  color: #ff0055;
+  text-shadow: 0 0 5px #ff0055;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.btn {
+  padding: 10px 16px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+}
+
+.btn-primary {
+  background: var(--accent-color);
+  color: white;
+  box-shadow: 0 4px 0 #990033;
+}
+
+.btn-primary:active {
+  transform: translateY(4px);
+  box-shadow: 0 0 0 #990033;
+}
+
+.btn-secondary {
+  background: #555;
+  color: white;
+  box-shadow: 0 4px 0 #333;
+}
+
+.btn-secondary:active {
+  transform: translateY(4px);
+  box-shadow: 0 0 0 #333;
+}
+
+/* Win presentation styles moved to WinPresentation.css */

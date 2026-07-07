@@ -1,0 +1,146 @@
+/* 当たり演出オーバーレイ */
+.win-presentation-container {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+  background: rgba(0,0,0,0.85);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.rainbow-bg {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(124deg, #ff2400, #e81d1d, #e8b71d, #e3e81d, #1de840, #1ddde8, #2b1de8, #dd00f3, #dd00f3);
+  background-size: 1800% 1800%;
+  opacity: 0;
+  animation: rainbow-fade-in 0.5s ease-in 6s forwards, rainbow-colors 3s ease infinite;
+  z-index: 1;
+}
+
+/* スキップ時の処理 (僕は喰種だを隠す) */
+.win-presentation-container.skip-bokuwa .text-bokuwa,
+.win-presentation-container.skip-bokuwa .text-ghoul {
+  display: none !important;
+  animation: none !important;
+}
+
+.win-presentation-container.skip-bokuwa .rainbow-bg,
+.win-presentation-container.skip-bokuwa .text-payout {
+  animation-delay: 0.5s !important; /* 役物落下の直後(0.5s)に表示 */
+}
+
+/* カウントアップとポップアニメーション */
+.payout-number {
+  display: inline-block;
+}
+
+.payout-number.pop-animation {
+  animation: final-pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  color: #ffff00;
+  text-shadow: 0 0 30px #ffff00, 0 0 50px #ff0000;
+}
+
+@keyframes final-pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.6); }
+  100% { transform: scale(1); }
+}
+
+.payout-suffix {
+  font-size: min(1.5rem, 4vw);
+  vertical-align: bottom;
+}
+
+@keyframes rainbow-fade-in {
+  to { opacity: 0.85; }
+}
+
+@keyframes rainbow-colors {
+  0%{background-position:0% 82%}
+  50%{background-position:100% 19%}
+  100%{background-position:0% 82%}
+}
+
+.text-bokuwa {
+  font-size: min(3rem, 7vw);
+  color: #fff;
+  text-shadow: 0 0 20px #ff0000;
+  position: absolute;
+  animation: slideUp 2.5s ease-out 1s forwards, fadeOut 0.3s ease-in 6s forwards;
+  opacity: 0;
+  font-family: "Hiragino Mincho ProN", "Hiragino Mincho Pro", "Yu Mincho", "YuMincho", "MS PMincho", serif;
+  z-index: 2;
+}
+
+.text-ghoul {
+  font-size: min(4.5rem, 11vw);
+  font-weight: bold;
+  color: #ff0000;
+  text-shadow: 0 0 30px #fff, 0 0 50px #ff0000;
+  position: absolute;
+  opacity: 0;
+  animation: appearShake 3s ease-in-out 3s forwards, fadeOut 0.3s ease-in 6s forwards;
+  font-family: "Hiragino Mincho ProN", "Hiragino Mincho Pro", "Yu Mincho", "YuMincho", "MS PMincho", serif;
+  z-index: 2;
+}
+
+@keyframes slideUp {
+  0% { transform: translateY(100vh); opacity: 0; }
+  20% { opacity: 1; transform: translateY(20vh); }
+  80% { opacity: 1; transform: translateY(-20vh); }
+  100% { transform: translateY(-50vh); opacity: 0; }
+}
+
+@keyframes appearShake {
+  0% { opacity: 0; transform: scale(0.1) rotate(-10deg); filter: blur(20px); }
+  5% { opacity: 1; transform: scale(1.8) translate(30px, 30px) rotate(5deg); filter: contrast(200%) brightness(200%); color: #fff; }
+  10% { transform: scale(1.1) translate(-30px, -30px) rotate(-8deg); color: #ff0000; text-shadow: 0 0 100px #ff0000; }
+  15% { transform: translate(40px, -20px) scale(1.5) skewX(20deg); }
+  20% { transform: translate(-40px, 30px) scale(0.8) skewX(-20deg); filter: invert(100%); }
+  25% { transform: translate(25px, 25px) scale(1.4); filter: invert(0%); }
+  30% { transform: translate(-35px, -25px) scale(1); color: #fff; }
+  35% { transform: translate(35px, -30px) scale(1.3); color: #ff0000; }
+  40% { transform: translate(-30px, 35px) scale(1.1); filter: hue-rotate(90deg); }
+  45% { transform: translate(0, 0) scale(1.4); filter: hue-rotate(0deg); }
+  50% { transform: scale(1) translate(15px, 15px); }
+  55% { transform: scale(1.2) translate(-15px, -15px); }
+  60% { transform: scale(1) translate(15px, -15px); }
+  80% { opacity: 1; transform: translate(0, 0) scale(1.1); text-shadow: 0 0 40px #fff, 0 0 100px #ff0000; color: #ff0000; }
+  100% { opacity: 1; transform: translate(0, 0) scale(1.1); filter: blur(0px); } /* Keep visible until fadeOut takes over */
+}
+
+@keyframes fadeOut {
+  to { opacity: 0; visibility: hidden; }
+}
+
+.text-payout {
+  position: absolute;
+  z-index: 3;
+  font-family: "Impact", "Arial Black", "Noto Sans JP", sans-serif;
+  font-size: min(4rem, 10vw);
+  font-weight: 900;
+  opacity: 0;
+  background: linear-gradient(to right, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8b00ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.8)) drop-shadow(0 0 40px rgba(255, 0, 0, 0.5));
+  animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 6s forwards, pulseRainbow 2s infinite 6.5s;
+}
+
+@keyframes popIn {
+  0% { transform: scale(0.5); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes pulseRainbow {
+  0% { filter: drop-shadow(0 0 20px rgba(255,255,255,0.8)) drop-shadow(0 0 40px rgba(255,0,0,0.5)); }
+  33% { filter: drop-shadow(0 0 20px rgba(255,255,255,0.8)) drop-shadow(0 0 40px rgba(0,255,0,0.5)); }
+  66% { filter: drop-shadow(0 0 20px rgba(255,255,255,0.8)) drop-shadow(0 0 40px rgba(0,0,255,0.5)); }
+  100% { filter: drop-shadow(0 0 20px rgba(255,255,255,0.8)) drop-shadow(0 0 40px rgba(255,0,0,0.5)); }
+}

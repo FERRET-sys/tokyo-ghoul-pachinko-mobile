@@ -1,0 +1,116 @@
+/* シネマティック演出コンテナ（真っ黒な背景） */
+.rush-cinematic-container {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background-color: #000;
+  z-index: 99; /* 液晶より上、枠より上（必要なら App.cssでz-index調整） */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  font-family: "Hiragino Mincho ProN", "Hiragino Mincho Pro", "Yu Mincho", "YuMincho", "MS PMincho", serif;
+  color: #fff;
+}
+
+.cine-text {
+  position: absolute;
+  opacity: 0;
+  font-weight: bold;
+}
+
+.red-text {
+  color: #ff0000;
+  text-shadow: 0 0 20px #ff0000;
+}
+
+/* 右から左へ流れるテキスト */
+.flow-text {
+  font-size: min(2.5rem, 6vw);
+  white-space: nowrap;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+@keyframes flowRightToLeft {
+  0% { transform: translateX(100vw); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateX(-100vw); opacity: 0; }
+}
+
+/* 叫ぶように出現して震えるテキスト */
+.shout-text {
+  font-size: min(3rem, 7vw);
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+}
+
+@keyframes shoutAndShake {
+  0% { transform: scale(0.1); opacity: 0; }
+  10% { transform: scale(1.3); opacity: 1; }
+  15% { transform: scale(1.0); }
+  20% { transform: translate(5px, 5px) scale(1.1); }
+  30% { transform: translate(-5px, -5px) scale(1.0); }
+  40% { transform: translate(-5px, 5px) scale(1.1); }
+  50% { transform: translate(5px, -5px) scale(1.0); }
+  60% { transform: translate(5px, 5px) scale(1.1); }
+  70% { transform: translate(-5px, -5px) scale(1.0); }
+  80% { transform: translate(-5px, 5px) scale(1.1); }
+  90% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(2.0); opacity: 0; }
+}
+
+/* 最大級の叫び */
+.shout-text-max {
+  font-size: min(4rem, 9vw);
+  text-shadow: 0 0 40px #ff0000;
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+}
+
+@keyframes shoutAndShakeMax {
+  0% { transform: scale(0.1); opacity: 0; }
+  5% { transform: scale(2.0); opacity: 1; filter: invert(100%); }
+  10% { transform: scale(1.0); filter: invert(0%); }
+  15% { transform: translate(10px, 10px) scale(1.2) rotate(2deg); }
+  25% { transform: translate(-10px, -10px) scale(0.9) rotate(-2deg); }
+  35% { transform: translate(-10px, 10px) scale(1.3) rotate(1deg); }
+  45% { transform: translate(10px, -10px) scale(0.8) rotate(-1deg); }
+  55% { transform: translate(15px, 0px) scale(1.2) rotate(3deg); }
+  65% { transform: translate(-15px, 0px) scale(0.9) rotate(-3deg); }
+  75% { transform: translate(0px, 15px) scale(1.1); }
+  85% { transform: scale(1.5); opacity: 1; filter: contrast(200%); }
+  100% { transform: scale(4.0); opacity: 0; filter: blur(10px); }
+}
+
+/* アニメーションのタイミング制御 (合計17.5秒に延長してさらにゆっくり) */
+
+/* Step 1: 0.0s - 4.0s */
+.step1 {
+  animation: flowRightToLeft 4.0s linear 0.0s forwards;
+}
+
+/* Step 2: 4.0s - 5.5s */
+.step2 {
+  animation: shoutAndShake 1.5s ease-in-out 4.0s forwards;
+}
+
+/* Step 3: 5.5s - 9.5s */
+.step3 {
+  animation: flowRightToLeft 4.0s linear 5.5s forwards;
+}
+
+/* Step 4: 9.5s - 11.0s */
+.step4 {
+  animation: shoutAndShake 1.5s ease-in-out 9.5s forwards;
+}
+
+/* Step 5: 11.0s - 15.0s */
+.step5 {
+  animation: flowRightToLeft 4.0s linear 11.0s forwards;
+}
+
+/* Step 6: 15.0s - 17.5s */
+.step6 {
+  animation: shoutAndShakeMax 2.5s ease-in-out 15.0s forwards;
+}

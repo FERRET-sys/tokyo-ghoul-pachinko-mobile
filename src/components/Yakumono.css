@@ -1,0 +1,59 @@
+.yakumono-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* クリックを邪魔しない */
+  z-index: 200; /* フレーム(50)や文字(100)よりも手前か、その間。今回は最前面クラス */
+  overflow: hidden; /* 画面外から落ちてくるのを表現 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 役物全体の落下コンテナ */
+.yakumono-drop {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  /* 画面の遙か上空から定位置へ一瞬で移動し、その後バウンドする */
+  animation: yakumonoDrop 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards, yakumonoShake 0.4s ease-in-out 0.6s infinite alternate;
+}
+
+/* 手の役物（例：画面左上から覆いかぶさるような配置） */
+.yakumono-part.hand {
+  position: absolute;
+  top: 10%;
+  left: 5%;
+  width: 40%;
+  object-fit: contain;
+  filter: drop-shadow(0 20px 30px rgba(0,0,0,0.8));
+}
+
+/* 顔・体の役物（例：画面右上から） */
+.yakumono-part.body {
+  position: absolute;
+  top: 15%;
+  right: 5%;
+  width: 45%;
+  object-fit: contain;
+  filter: drop-shadow(0 20px 30px rgba(0,0,0,0.8));
+}
+
+@keyframes yakumonoDrop {
+  0% { transform: translateY(-150%); opacity: 0.5; }
+  40% { transform: translateY(5%); opacity: 1; } /* 勢い余って少し下へ */
+  60% { transform: translateY(-3%); } /* 少し跳ね返る */
+  80% { transform: translateY(1%); }
+  100% { transform: translateY(0); }
+}
+
+/* 落下後にガタガタ震える */
+@keyframes yakumonoShake {
+  0% { transform: translate(1px, 1px) rotate(0deg); }
+  25% { transform: translate(-2px, -1px) rotate(-1deg); }
+  50% { transform: translate(1px, -2px) rotate(1deg); }
+  75% { transform: translate(-1px, 1px) rotate(0deg); }
+  100% { transform: translate(2px, -1px) rotate(-1deg); }
+}
