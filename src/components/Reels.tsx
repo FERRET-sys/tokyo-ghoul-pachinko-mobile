@@ -274,7 +274,7 @@ export const Reels: React.FC<ReelsProps> = ({ subState, spinInfo, speedMode }) =
         ref={canvasRef} 
         width={600} 
         height={320} 
-        style={{ width: '85%', maxWidth: '280px', borderRadius: '10px', boxShadow: '0 0 15px rgba(255, 0, 85, 0.4)' }}
+        style={{ width: '90%', maxWidth: '100%', borderRadius: '10px', boxShadow: '0 0 15px rgba(255, 0, 85, 0.4)' }}
       />
       <div className={`reach-flash ${isReachActive ? 'active' : ''}`} />
       <div className={`pseudo-flash ${pseudoFlash ? 'active' : ''}`} />

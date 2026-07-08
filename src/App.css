@@ -30,7 +30,9 @@ body, html {
   width: 100vw;
   height: 100vh;
   box-sizing: border-box;
+  padding-top: 45px; /* Space for mobile status bar */
   padding-bottom: 240px; /* Space for control panel */
+  overflow-x: hidden;
   transition: padding-bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -665,3 +667,51 @@ body, html {
 }
 
 /* Win presentation styles moved to WinPresentation.css */
+
+/* Mobile Responsiveness Media Queries */
+@media (max-width: 768px) {
+  .machine-container {
+    width: 140vw; /* Scale up significantly to fill the screen with the center */
+    max-height: none; /* Remove height constraint so it scales freely */
+    /* This will crop the left/right frame edges but make the screen large */
+  }
+
+  .ui-collapsed .machine-container {
+    width: 160vw; /* Make it even larger when UI is collapsed */
+  }
+
+  .control-panel {
+    padding: 10px;
+  }
+
+  .data-counter {
+    gap: 2px;
+    padding: 5px;
+  }
+
+  .data-item {
+    min-width: 50px;
+  }
+
+  .data-label {
+    font-size: 0.7rem;
+  }
+
+  .data-value {
+    font-size: 1.1rem;
+  }
+
+  .btn {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+  }
+
+  .charge-text {
+    font-size: min(10vw, 3rem);
+  }
+
+  .mobile-test-menu {
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+}

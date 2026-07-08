@@ -41,6 +41,13 @@ function App() {
   const [showTestMenu, setShowTestMenu] = React.useState(false);
   const [isUICollapsed, setIsUICollapsed] = React.useState(false);
 
+  // Auto-collapse UI on mobile
+  React.useEffect(() => {
+    if (window.innerWidth <= 768) {
+      setIsUICollapsed(true);
+    }
+  }, []);
+
   return (
     <div className={`layout-wrapper ${isUICollapsed ? 'ui-collapsed' : ''}`}>
       <div className="machine-container">
