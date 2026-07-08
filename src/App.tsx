@@ -13,6 +13,7 @@ function App() {
   const {
     gameState,
     subState,
+    isReadyForNextSpin,
     balls,
     reserveQueue,
     reserveEvent,
@@ -63,6 +64,17 @@ function App() {
         </div>
 
         <PseudoRen isActive={subState === 'SPINNING'} spinInfo={spinInfo} />
+
+        {/* 保留入賞先読みカットイン */}
+        {reserveEvent && (
+          <div className="reserve-presentation-overlay">
+            <div className={`reserve-presentation-orb color-${reserveEvent.color}`}>
+              <div className="reserve-orb-inner">
+                <span className="reserve-orb-text">東京喰種</span>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* 喰種チャージの表示 */}
@@ -72,16 +84,6 @@ function App() {
         </div>
       )}
 
-      {/* 保留入賞先読みカットイン */}
-      {reserveEvent && (
-        <div className="reserve-presentation-overlay">
-          <div className={`reserve-presentation-orb color-${reserveEvent.color}`}>
-            <div className="reserve-orb-inner">
-              <span className="reserve-orb-text">東京喰種</span>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* スマホ向け：ステータスバー */}
       <div className="mobile-status-bar">
@@ -113,6 +115,9 @@ function App() {
 
       {showTestMenu && (
         <div className="mobile-test-menu">
+          <div style={{ fontSize: '10px', color: '#fff', marginBottom: '5px' }}>
+            DBG: sub={subState} | q={reserveQueue.length} | rdy={isReadyForNextSpin ? '1' : '0'}
+          </div>
           <button className="test-btn red" onClick={() => forceWin('CINEMATIC')}>全回転</button>
           <button className="test-btn blue" onClick={() => forceWin('NORMAL')}>通常</button>
           <button className="test-btn purple" onClick={() => forceWin('CHARGE')}>チャージ</button>

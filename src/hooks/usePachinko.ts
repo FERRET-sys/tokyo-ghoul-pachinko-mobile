@@ -273,7 +273,10 @@ export function usePachinko() {
     let interval: number;
     // 稼働条件：IDLEまたはSPINNINGの時のみ。
     if (autoShoot && (subState === 'IDLE' || subState === 'SPINNING')) {
-      const shootInterval = speedMode === 2 ? 50 : speedMode === 1 ? 200 : 600;
+      const isPseudoAnimPlaying = spinInfo?.hasPseudoAnim && subState === 'SPINNING';
+      const effectiveSpeedMode = isPseudoAnimPlaying ? 0 : speedMode;
+      const shootInterval = effectiveSpeedMode === 2 ? 50 : effectiveSpeedMode === 1 ? 200 : 600;
+      
       interval = window.setInterval(() => {
         if (balls <= 0) {
           if (autoLend && money >= 500) {
@@ -285,8 +288,8 @@ export function usePachinko() {
         }
       }, shootInterval);
     }
-    return () => clearInterval(interval);
-  }, [autoShoot, balls, subState, shoot, speedMode, autoLend, money, reserve]);
+    return () => window.clearInterval(interval);
+  }, [autoShoot, subState, speedMode, balls, autoLend, money, shoot, spinInfo?.hasPseudoAnim, reserve]);
 
   const spinTimerRef = React.useRef<number | null>(null);
 
@@ -321,7 +324,8 @@ export function usePachinko() {
       let spinDuration = isWin ? 4000 : isReach ? 3000 : 1000; 
       if (pseudoCount === 3) spinDuration += 12000;
       else if (pseudoCount === 2) spinDuration += 8000;
-      else if (pseudoCount === 1) spinDuration += 4000;
+      else if (pseudoCount === 1) spinDuration += 6000;
+      else if (pseudoCount === 0 && hasPseudoAnim) spinDuration += 2000;
       
       if (!hasPseudoAnim) {
         if (speedMode === 1) spinDuration = isWin ? 2000 : isReach ? 1500 : 500;
@@ -500,6 +504,7 @@ export function usePachinko() {
   return {
     gameState,
     subState,
+    isReadyForNextSpin,
     balls,
     reserveQueue,
     reserveEvent,

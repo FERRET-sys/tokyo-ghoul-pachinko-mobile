@@ -68,6 +68,32 @@ export const Reels: React.FC<ReelsProps> = ({ subState, spinInfo, speedMode }) =
       timers.push(setTimeout(() => setReelSpinning(prev => [false, prev[1], prev[2]]), L_STOP));
       timers.push(setTimeout(() => setReelSpinning(prev => [prev[0], prev[1], false]), R_STOP));
 
+      const scheduleReachTease = (baseDelay: number) => {
+        if (!spinInfo.isReach) {
+          timers.push(setTimeout(() => setReelSpinning(prev => [prev[0], false, prev[2]]), baseDelay + R_STOP));
+          return;
+        }
+        
+        // リーチ煽り（中リールのコマ送り）
+        timers.push(setTimeout(() => {
+          setIsVibrating(true);
+          // 停止予定の1つ前の数字を表示（当落の直前）
+          const targetNum = parseInt(finalStops[1]);
+          const prevNum = targetNum === 1 ? 9 : targetNum - 1;
+          setReels(prev => [prev[0], prevNum.toString(), prev[2]]);
+          setReelSpinning(prev => [prev[0], false, prev[2]]); // 一旦停止して見せる
+        }, baseDelay + R_STOP));
+        
+        // 最終結果を表示
+        timers.push(setTimeout(() => {
+          setReels(prev => [prev[0], finalStops[1], prev[2]]);
+        }, baseDelay + R_STOP + 800)); // 0.8秒後に最終結果に切り替え
+      };
+
+      if (pCount === 0) {
+        scheduleReachTease(0);
+      }
+
       if (pCount >= 1) {
         timers.push(setTimeout(() => {
           setReels(pCount > 1 ? pseudo2Stops : finalStops);
@@ -75,6 +101,7 @@ export const Reels: React.FC<ReelsProps> = ({ subState, spinInfo, speedMode }) =
         }, 4000));
         timers.push(setTimeout(() => setReelSpinning(prev => [false, prev[1], prev[2]]), 4000 + L_STOP));
         timers.push(setTimeout(() => setReelSpinning(prev => [prev[0], prev[1], false]), 4000 + R_STOP));
+        if (pCount === 1) scheduleReachTease(4000);
       }
 
       if (pCount >= 2) {
@@ -84,6 +111,7 @@ export const Reels: React.FC<ReelsProps> = ({ subState, spinInfo, speedMode }) =
         }, 8000));
         timers.push(setTimeout(() => setReelSpinning(prev => [false, prev[1], prev[2]]), 8000 + L_STOP));
         timers.push(setTimeout(() => setReelSpinning(prev => [prev[0], prev[1], false]), 8000 + R_STOP));
+        if (pCount === 2) scheduleReachTease(8000);
       }
 
       if (pCount >= 3) {
@@ -93,14 +121,7 @@ export const Reels: React.FC<ReelsProps> = ({ subState, spinInfo, speedMode }) =
         }, 12000));
         timers.push(setTimeout(() => setReelSpinning(prev => [false, prev[1], prev[2]]), 12000 + L_STOP));
         timers.push(setTimeout(() => setReelSpinning(prev => [prev[0], prev[1], false]), 12000 + R_STOP));
-      }
-
-      // Middle stop vibration
-      if (spinInfo.isReach) {
-        const reachDelay = pCount === 3 ? 12000 : pCount === 2 ? 8000 : pCount === 1 ? 4000 : 0;
-        timers.push(setTimeout(() => {
-          setIsVibrating(true);
-        }, reachDelay + R_STOP));
+        if (pCount === 3) scheduleReachTease(12000);
       }
 
       return () => timers.forEach(clearTimeout);
