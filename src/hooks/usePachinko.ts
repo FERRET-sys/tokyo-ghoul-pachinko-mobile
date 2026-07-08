@@ -148,15 +148,18 @@ function generateSpinData(gameState: GameState): SpinData {
     if (isWin) {
       if (randPseudo < 0.6) pseudoCount = 3;
       else if (randPseudo < 0.7) pseudoCount = 2;
+      else if (randPseudo < 0.85) pseudoCount = 1;
     } else if (isReach) {
       if (randPseudo < 0.2) pseudoCount = 3;
       else if (randPseudo < 0.5) pseudoCount = 2;
+      else if (randPseudo < 0.75) pseudoCount = 1;
     } else if (!isCharge) {
-      if (randPseudo < 0.02) pseudoCount = 2;
+      if (randPseudo < 0.01) pseudoCount = 2;
+      else if (randPseudo < 0.08) pseudoCount = 1;
     }
   }
 
-  const hasPseudoAnim = gameState === 'NORMAL' && (pseudoCount >= 1 || (pseudoCount === 0 && Math.random() < 0.02));
+  const hasPseudoAnim = gameState === 'NORMAL' && (pseudoCount >= 1 || (pseudoCount === 0 && Math.random() < 0.15));
 
   return {
     id: Date.now().toString() + Math.random().toString(),
