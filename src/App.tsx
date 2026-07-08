@@ -6,7 +6,6 @@ import { ControlPanel } from './components/ControlPanel';
 import { WinPresentation } from './components/WinPresentation';
 import { Yakumono } from './components/Yakumono';
 import { RushCinematic } from './components/RushCinematic';
-import { PseudoRen } from './components/PseudoRen';
 import { SPECS } from './constants/pachinkoSpecs';
 
 function App() {
@@ -28,7 +27,7 @@ function App() {
     speedMode,
     toggleSpeed,
     shoot,
-    completeWin,
+    startPayout,
     addBalls,
     forceWin,
     money,
@@ -66,7 +65,7 @@ function App() {
           </div>
 
           <RushCinematic isActive={subState === 'PRE_WIN_CINEMATIC'} />
-          <WinPresentation winInfo={winInfo} completeWin={completeWin} isActive={subState === 'WIN_PRESENTATION'} />
+          <WinPresentation winInfo={winInfo} startPayout={startPayout} isActive={subState === 'WIN_PRESENTATION'} />
           <Yakumono isWin={subState === 'WIN_PRESENTATION'} skipDelay={winInfo?.isCinematic} />
         </div>
 

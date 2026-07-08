@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useRef, useReducer } from 'react';
+import { useEffect, useCallback, useRef, useReducer } from 'react';
 import { SPECS } from '../constants/pachinkoSpecs';
 
 export type GameState = 'NORMAL' | 'RUSH';
@@ -15,6 +15,7 @@ export interface PayoutState {
 
 export interface SpinInfo {
   isWin: boolean;
+  isCharge: boolean;
   isReach: boolean;
   finalReels: string[];
   pseudoCount: number;
@@ -332,6 +333,7 @@ function pachinkoReducer(state: PachinkoState, action: PachinkoAction): Pachinko
         rushSpins: nextRushSpins,
         spinInfo: {
           isWin: currentSpin.isWin,
+          isCharge: currentSpin.isCharge,
           isReach: currentSpin.isReach,
           finalReels: currentSpin.finalReels,
           pseudoCount: currentSpin.pseudoCount,
@@ -483,7 +485,7 @@ function pachinkoReducer(state: PachinkoState, action: PachinkoAction): Pachinko
         return {
           ...state,
           winInfo: win,
-          spinInfo: { isWin: true, isReach: true, finalReels: ['7', '7', '7'], pseudoCount: 0, hasPseudoAnim: false },
+          spinInfo: { isWin: true, isCharge: false, isReach: true, finalReels: ['7', '7', '7'], pseudoCount: 0, hasPseudoAnim: false },
           subState: 'PRE_WIN_CINEMATIC'
         };
       } else if (action.winType === 'CHARGE') {
@@ -491,7 +493,7 @@ function pachinkoReducer(state: PachinkoState, action: PachinkoAction): Pachinko
         return {
           ...state,
           winInfo: win,
-          spinInfo: { isWin: true, isReach: true, finalReels: ['3', '3', '3'], pseudoCount: 0, hasPseudoAnim: false },
+          spinInfo: { isWin: false, isCharge: true, isReach: false, finalReels: ['3', '3', '3'], pseudoCount: 0, hasPseudoAnim: false },
           subState: 'CHARGE'
         };
       } else {
@@ -499,7 +501,7 @@ function pachinkoReducer(state: PachinkoState, action: PachinkoAction): Pachinko
         return {
           ...state,
           winInfo: win,
-          spinInfo: { isWin: true, isReach: true, finalReels: ['3', '3', '3'], pseudoCount: 0, hasPseudoAnim: false },
+          spinInfo: { isWin: true, isCharge: false, isReach: true, finalReels: ['3', '3', '3'], pseudoCount: 0, hasPseudoAnim: false },
           subState: 'WIN_PRESENTATION',
           currentStreak: state.gameState === 'NORMAL' ? 1 : state.currentStreak + 1,
           totalPayout: state.gameState === 'NORMAL' ? 0 : state.totalPayout,

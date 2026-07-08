@@ -160,7 +160,7 @@ export const Reels: React.FC<ReelsProps> = ({ subState, spinInfo, speedMode }) =
     }
 
     let isCancelled = false;
-    let timers: NodeJS.Timeout[] = [];
+    let timers: number[] = [];
 
     const wait = (ms: number) => new Promise<void>(resolve => {
       const t = setTimeout(() => resolve(), ms);
