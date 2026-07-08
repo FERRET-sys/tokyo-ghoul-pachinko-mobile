@@ -1,12 +1,12 @@
 import React from 'react';
 import './App.css';
-import './App.css';
 import { usePachinko } from './hooks/usePachinko';
 import { Reels } from './components/Reels';
 import { ControlPanel } from './components/ControlPanel';
 import { WinPresentation } from './components/WinPresentation';
 import { Yakumono } from './components/Yakumono';
 import { RushCinematic } from './components/RushCinematic';
+import { PseudoRen } from './components/PseudoRen';
 import { SPECS } from './constants/pachinkoSpecs';
 
 function App() {
@@ -14,7 +14,8 @@ function App() {
     gameState,
     subState,
     balls,
-    reserve,
+    reserveQueue,
+    reserveEvent,
     spins,
     rushSpins,
     currentStreak,
@@ -51,7 +52,7 @@ function App() {
             <Reels 
               subState={subState} 
               spinInfo={spinInfo} 
-              speedMode={speedMode} 
+              speedMode={spinInfo?.hasPseudoAnim ? 0 : speedMode} 
               gameState={gameState} 
             />
           </div>
@@ -60,12 +61,25 @@ function App() {
           <WinPresentation winInfo={winInfo} completeWin={completeWin} isActive={subState === 'WIN_PRESENTATION'} />
           <Yakumono isWin={subState === 'WIN_PRESENTATION'} skipDelay={winInfo?.isCinematic} />
         </div>
+
+        <PseudoRen isActive={subState === 'SPINNING'} spinInfo={spinInfo} />
       </div>
 
       {/* 喰種チャージの表示 */}
       {subState === 'CHARGE' && (
         <div className="charge-presentation">
           <div className="charge-text">喰種チャージ<br/>300 獲得</div>
+        </div>
+      )}
+
+      {/* 保留入賞先読みカットイン */}
+      {reserveEvent && (
+        <div className="reserve-presentation-overlay">
+          <div className={`reserve-presentation-orb color-${reserveEvent.color}`}>
+            <div className="reserve-orb-inner">
+              <span className="reserve-orb-text">東京喰種</span>
+            </div>
+          </div>
         </div>
       )}
 
@@ -78,9 +92,15 @@ function App() {
         <div className="hud-reserve">
           保留
           <div className="reserve-container">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className={`reserve-dot ${i < reserve ? 'active' : ''}`}></div>
-            ))}
+            {[...Array(4)].map((_, i) => {
+              const item = reserveQueue[i];
+              const colorClass = item ? `color-${item.color}` : '';
+              return (
+                <div key={item ? item.id : i} className={`reserve-dot ${item ? 'active' : ''} ${colorClass}`}>
+                  {item && <span className="dot-text">東京喰種</span>}
+                </div>
+              );
+            })}
           </div>
         </div>
         <button 

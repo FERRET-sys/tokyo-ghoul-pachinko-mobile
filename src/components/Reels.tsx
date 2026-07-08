@@ -46,32 +46,67 @@ export const Reels: React.FC<ReelsProps> = ({ subState, spinInfo, speedMode }) =
 
   useEffect(() => {
     if (subState === 'SPINNING' && spinInfo) {
-      setReels(spinInfo.finalReels);
+      const pCount = spinInfo.pseudoCount || 0;
+      
+      let finalStops = spinInfo.finalReels;
+      let pseudo1Stops = [(Math.floor(Math.random() * 9) + 1).toString(), (Math.floor(Math.random() * 9) + 1).toString(), (Math.floor(Math.random() * 9) + 1).toString()];
+      let pseudo2Stops = [(Math.floor(Math.random() * 9) + 1).toString(), (Math.floor(Math.random() * 9) + 1).toString(), (Math.floor(Math.random() * 9) + 1).toString()];
+      let pseudo3Stops = [(Math.floor(Math.random() * 9) + 1).toString(), (Math.floor(Math.random() * 9) + 1).toString(), (Math.floor(Math.random() * 9) + 1).toString()];
+      
+      if (pseudo1Stops[0] === pseudo1Stops[1] && pseudo1Stops[1] === pseudo1Stops[2]) pseudo1Stops[2] = ((parseInt(pseudo1Stops[2]) % 9) + 1).toString();
+      if (pseudo2Stops[0] === pseudo2Stops[1] && pseudo2Stops[1] === pseudo2Stops[2]) pseudo2Stops[2] = ((parseInt(pseudo2Stops[2]) % 9) + 1).toString();
+      if (pseudo3Stops[0] === pseudo3Stops[1] && pseudo3Stops[1] === pseudo3Stops[2]) pseudo3Stops[2] = ((parseInt(pseudo3Stops[2]) % 9) + 1).toString();
+
+      setReels(pCount > 0 ? pseudo1Stops : finalStops);
       setReelSpinning([true, true, true]);
 
       const L_STOP = speedMode === 2 ? 100 : speedMode === 1 ? 500 : 1000;
       const R_STOP = speedMode === 2 ? 200 : speedMode === 1 ? 1000 : 2000;
+      
+      let timers: NodeJS.Timeout[] = [];
 
-      // 1. 左停止
-      const t1 = setTimeout(() => {
-        setReelSpinning(prev => [false, prev[1], prev[2]]);
-      }, L_STOP);
+      timers.push(setTimeout(() => setReelSpinning(prev => [false, prev[1], prev[2]]), L_STOP));
+      timers.push(setTimeout(() => setReelSpinning(prev => [prev[0], prev[1], false]), R_STOP));
 
-      // 2. 右停止
-      const t2 = setTimeout(() => {
-        setReelSpinning(prev => [prev[0], prev[1], false]);
-        
-        // 3. リーチの場合のタメ演出（バイブ＆フラッシュ）
-        if (spinInfo.isReach) {
+      if (pCount >= 1) {
+        timers.push(setTimeout(() => {
+          setReels(pCount > 1 ? pseudo2Stops : finalStops);
+          setReelSpinning([true, true, true]);
+        }, 4000));
+        timers.push(setTimeout(() => setReelSpinning(prev => [false, prev[1], prev[2]]), 4000 + L_STOP));
+        timers.push(setTimeout(() => setReelSpinning(prev => [prev[0], prev[1], false]), 4000 + R_STOP));
+      }
+
+      if (pCount >= 2) {
+        timers.push(setTimeout(() => {
+          setReels(pCount > 2 ? pseudo3Stops : finalStops);
+          setReelSpinning([true, true, true]);
+        }, 8000));
+        timers.push(setTimeout(() => setReelSpinning(prev => [false, prev[1], prev[2]]), 8000 + L_STOP));
+        timers.push(setTimeout(() => setReelSpinning(prev => [prev[0], prev[1], false]), 8000 + R_STOP));
+      }
+
+      if (pCount >= 3) {
+        timers.push(setTimeout(() => {
+          setReels(finalStops);
+          setReelSpinning([true, true, true]);
+        }, 12000));
+        timers.push(setTimeout(() => setReelSpinning(prev => [false, prev[1], prev[2]]), 12000 + L_STOP));
+        timers.push(setTimeout(() => setReelSpinning(prev => [prev[0], prev[1], false]), 12000 + R_STOP));
+      }
+
+      // Middle stop vibration
+      if (spinInfo.isReach) {
+        const reachDelay = pCount === 3 ? 12000 : pCount === 2 ? 8000 : pCount === 1 ? 4000 : 0;
+        timers.push(setTimeout(() => {
           setIsVibrating(true);
-          setTimeout(() => setIsVibrating(false), 800);
-        }
-      }, R_STOP);
+        }, reachDelay + R_STOP));
+      }
 
-      return () => { clearTimeout(t1); clearTimeout(t2); };
-    } else {
-      // STOPPINGやWIN_PRESENTATIONに入ったらすべて停止
+      return () => timers.forEach(clearTimeout);
+    } else if (subState === 'IDLE' && spinInfo) {
       setReelSpinning([false, false, false]);
+      setIsVibrating(false);
     }
   }, [subState, spinInfo, speedMode]);
 

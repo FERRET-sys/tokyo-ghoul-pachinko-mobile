@@ -1,0 +1,141 @@
+.pseudo-ren-container {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* Scattered Text */
+.scattered-text {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.scattered-text .char {
+  position: absolute;
+  font-size: 60px;
+  font-weight: 900;
+  color: white;
+  text-shadow: 0 0 10px rgba(255,255,255,0.8), 2px 2px 5px black;
+  opacity: 0;
+  animation: scatter-in 1.5s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
+}
+
+.char1 { top: 10%; left: 20%; transform: rotate(-20deg); animation-delay: 0.1s; }
+.char2 { top: 60%; left: 15%; transform: rotate(15deg); animation-delay: 0.3s; }
+.char3 { top: 30%; right: 25%; transform: rotate(-10deg); animation-delay: 0.2s; }
+.char4 { top: 70%; right: 10%; transform: rotate(25deg); animation-delay: 0.4s; }
+.char5 { top: 80%; left: 40%; transform: rotate(-5deg); animation-delay: 0.5s; }
+.char6 { top: 15%; left: 50%; transform: rotate(10deg); animation-delay: 0.0s; }
+
+@keyframes scatter-in {
+  0% { opacity: 0; filter: blur(10px); transform: scale(2) var(--rotate, rotate(0)); }
+  30% { opacity: 1; filter: blur(0px); transform: scale(1) var(--rotate, rotate(0)); }
+  70% { opacity: 1; filter: blur(0px); transform: scale(1) var(--rotate, rotate(0)); }
+  100% { opacity: 0; filter: blur(5px); transform: scale(0.5) var(--rotate, rotate(0)); }
+}
+
+/* Evaporate */
+.evaporate-text {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.evaporate-text .char {
+  position: absolute;
+  font-size: 60px;
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.8);
+  text-shadow: 0 0 10px rgba(255,255,255,0.5);
+  animation: evaporate 1s ease-out forwards;
+}
+.evaporate-text .char1 { top: 10%; left: 20%; }
+.evaporate-text .char2 { top: 60%; left: 15%; }
+.evaporate-text .char3 { top: 30%; right: 25%; }
+.evaporate-text .char4 { top: 70%; right: 10%; }
+.evaporate-text .char5 { top: 80%; left: 40%; }
+.evaporate-text .char6 { top: 15%; left: 50%; }
+
+@keyframes evaporate {
+  0% { opacity: 0.8; filter: blur(2px); transform: translateY(0) scale(1); }
+  100% { opacity: 0; filter: blur(20px); transform: translateY(-100px) scale(1.5); }
+}
+
+/* Combined Success */
+.combined-success {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: combined-flash 0.5s ease-out forwards;
+}
+
+@keyframes combined-flash {
+  0% { filter: brightness(3) contrast(2); transform: scale(1.2); }
+  100% { filter: brightness(1) contrast(1); transform: scale(1); }
+}
+
+.keizoku-bg {
+  position: absolute;
+  font-size: 200px;
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 0 30px rgba(255,255,255,0.5), 0 0 10px rgba(0,0,0,0.8);
+  white-space: nowrap;
+  letter-spacing: -10px;
+  z-index: 1;
+  animation: bg-pulse 2s infinite alternate;
+}
+
+@keyframes bg-pulse {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(1.05); opacity: 1; text-shadow: 0 0 50px rgba(255,255,255,1), 0 0 20px rgba(0,0,0,1); }
+}
+
+.vertical-box {
+  position: relative;
+  z-index: 2;
+  border: 4px solid rgba(255,255,255,0.8);
+  padding: 20px 10px;
+  box-shadow: 0 0 15px rgba(255,255,255,0.5), inset 0 0 15px rgba(255,255,255,0.5);
+  background: rgba(0,0,0,0.3);
+  backdrop-filter: blur(2px);
+}
+
+.vertical-text {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  font-size: 50px;
+  font-weight: 900;
+  color: white;
+  text-shadow: 2px 2px 4px #000, 0 0 10px #fff;
+  letter-spacing: 5px;
+}
+
+.multiplier-text {
+  position: absolute;
+  top: 10%;
+  right: 10%;
+  font-size: 80px;
+  font-weight: 900;
+  color: #ff3300;
+  text-shadow: 
+    -2px -2px 0 #fff,  
+     2px -2px 0 #fff,
+    -2px  2px 0 #fff,
+     2px  2px 0 #fff,
+     0 0 20px #ff0000;
+  z-index: 3;
+  animation: multi-stamp 0.3s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
+}
+
+@keyframes multi-stamp {
+  0% { transform: scale(3) rotate(-20deg); opacity: 0; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
