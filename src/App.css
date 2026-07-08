@@ -478,23 +478,6 @@ body, html {
   to { opacity: 0; transform: translate(-50%, -20px); }
 }
 
-.reserve-container {
-  display: flex;
-  gap: 5px;
-}
-
-.reserve-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: #333;
-  border: 1px solid #666;
-}
-
-.reserve-dot.active {
-  background: #0f0;
-  box-shadow: 0 0 10px #0f0;
-}
 
 .game-state-label {
   font-size: 0.9rem;

@@ -63,8 +63,6 @@ function App() {
           <Yakumono isWin={subState === 'WIN_PRESENTATION'} skipDelay={winInfo?.isCinematic} />
         </div>
 
-        <PseudoRen isActive={subState === 'SPINNING'} spinInfo={spinInfo} />
-
         {/* 保留入賞先読みカットイン */}
         {reserveEvent && (
           <div className="reserve-presentation-overlay">

@@ -9,60 +9,109 @@
   overflow: hidden;
 }
 
-/* Scattered Text */
-.scattered-text {
-  position: relative;
+/* Dynamic Characters (Scattered <-> Assembled) */
+.dynamic-chars {
+  position: absolute;
   width: 100%;
   height: 100%;
+  top: 0; left: 0;
+  z-index: 5;
 }
-.scattered-text .char {
+
+.dynamic-chars .char {
   position: absolute;
-  font-size: 60px;
   font-weight: 900;
   color: white;
-  text-shadow: 0 0 10px rgba(255,255,255,0.8), 2px 2px 5px black;
-  opacity: 0;
-  animation: scatter-in 1.5s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  text-shadow: 2px 2px 4px #000, 0 0 10px #fff;
+  transform-origin: center;
+  writing-mode: vertical-rl;
+  text-orientation: upright;
 }
 
-.char1 { top: 10%; left: 20%; transform: rotate(-20deg); animation-delay: 0.1s; }
-.char2 { top: 60%; left: 15%; transform: rotate(15deg); animation-delay: 0.3s; }
-.char3 { top: 30%; right: 25%; transform: rotate(-10deg); animation-delay: 0.2s; }
-.char4 { top: 70%; right: 10%; transform: rotate(25deg); animation-delay: 0.4s; }
-.char5 { top: 80%; left: 40%; transform: rotate(-5deg); animation-delay: 0.5s; }
-.char6 { top: 15%; left: 50%; transform: rotate(10deg); animation-delay: 0.0s; }
+/* Scattered State */
+.dynamic-chars.scattered .char {
+  font-size: 24px;
+  text-shadow: 0 0 10px rgba(255,255,255,0.8), 2px 2px 5px black;
+  animation: pop-in 0.3s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
+}
 
-@keyframes scatter-in {
-  0% { opacity: 0; filter: blur(10px); transform: scale(2) var(--rotate, rotate(0)); }
-  30% { opacity: 1; filter: blur(0px); transform: scale(1) var(--rotate, rotate(0)); }
-  70% { opacity: 1; filter: blur(0px); transform: scale(1) var(--rotate, rotate(0)); }
-  100% { opacity: 0; filter: blur(5px); transform: scale(0.5) var(--rotate, rotate(0)); }
+@keyframes pop-in {
+  0% { filter: blur(5px); transform: scale(2) var(--rot); opacity: 0; }
+  100% { filter: blur(0px); transform: scale(1) var(--rot); opacity: 1; }
+}
+
+.dynamic-chars.scattered .char1 { top: 30%; left: 35%; --rot: rotate(-20deg); transform: scale(1) rotate(-20deg); }
+.dynamic-chars.scattered .char2 { top: 60%; left: 30%; --rot: rotate(15deg); transform: scale(1) rotate(15deg); }
+.dynamic-chars.scattered .char3 { top: 40%; right: 35%; --rot: rotate(-10deg); transform: scale(1) rotate(-10deg); }
+.dynamic-chars.scattered .char4 { top: 60%; right: 30%; --rot: rotate(25deg); transform: scale(1) rotate(25deg); }
+.dynamic-chars.scattered .char5 { top: 70%; left: 45%; --rot: rotate(-5deg); transform: scale(1) rotate(-5deg); }
+.dynamic-chars.scattered .char6 { top: 25%; left: 45%; --rot: rotate(10deg); transform: scale(1) rotate(10deg); }
+
+/* Assembled State */
+.dynamic-chars.assembled .char {
+  font-size: 20px;
+  transform: translateX(-50%) rotate(0deg);
+  left: 50%;
+  z-index: 6;
+}
+
+.dynamic-chars.assembled .char1 { top: calc(50% - 75px); }
+.dynamic-chars.assembled .char2 { top: calc(50% - 45px); }
+.dynamic-chars.assembled .char3 { top: calc(50% - 15px); }
+.dynamic-chars.assembled .char4 { top: calc(50% + 15px); }
+.dynamic-chars.assembled .char5 { top: calc(50% + 45px); }
+.dynamic-chars.assembled .char6 { top: calc(50% + 75px); }
+
+/* Vertical Box BG */
+.vertical-box-bg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  width: 40px;
+  height: 200px;
+  border: 4px solid rgba(255,255,255,0.8);
+  box-shadow: 0 0 15px rgba(255,255,255,0.5), inset 0 0 15px rgba(255,255,255,0.5);
+  background: rgba(0,0,0,0.3);
+  backdrop-filter: blur(2px);
+  opacity: 0;
+  transition: all 0.5s ease-out;
+  z-index: 4;
+}
+
+.dynamic-chars.assembled .vertical-box-bg {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
 }
 
 /* Evaporate */
 .evaporate-text {
-  position: relative;
+  position: absolute;
   width: 100%;
   height: 100%;
+  top: 0; left: 0;
 }
 .evaporate-text .char {
   position: absolute;
-  font-size: 60px;
+  font-size: 24px;
   font-weight: 900;
   color: rgba(255, 255, 255, 0.8);
   text-shadow: 0 0 10px rgba(255,255,255,0.5);
   animation: evaporate 1s ease-out forwards;
+  writing-mode: vertical-rl;
+  text-orientation: upright;
 }
-.evaporate-text .char1 { top: 10%; left: 20%; }
-.evaporate-text .char2 { top: 60%; left: 15%; }
-.evaporate-text .char3 { top: 30%; right: 25%; }
-.evaporate-text .char4 { top: 70%; right: 10%; }
-.evaporate-text .char5 { top: 80%; left: 40%; }
-.evaporate-text .char6 { top: 15%; left: 50%; }
+.evaporate-text .char1 { top: 30%; left: 35%; --rot: rotate(-20deg); }
+.evaporate-text .char2 { top: 60%; left: 30%; --rot: rotate(15deg); }
+.evaporate-text .char3 { top: 40%; right: 35%; --rot: rotate(-10deg); }
+.evaporate-text .char4 { top: 60%; right: 30%; --rot: rotate(25deg); }
+.evaporate-text .char5 { top: 70%; left: 45%; --rot: rotate(-5deg); }
+.evaporate-text .char6 { top: 25%; left: 45%; --rot: rotate(10deg); }
 
 @keyframes evaporate {
-  0% { opacity: 0.8; filter: blur(2px); transform: translateY(0) scale(1); }
-  100% { opacity: 0; filter: blur(20px); transform: translateY(-100px) scale(1.5); }
+  0% { opacity: 0.8; filter: blur(2px); transform: translateY(0) scale(1) var(--rot); }
+  100% { opacity: 0; filter: blur(20px); transform: translateY(-100px) scale(1.5) var(--rot); }
 }
 
 /* Combined Success */
@@ -74,6 +123,7 @@
   justify-content: center;
   align-items: center;
   animation: combined-flash 0.5s ease-out forwards;
+  z-index: 2;
 }
 
 @keyframes combined-flash {
@@ -83,12 +133,12 @@
 
 .keizoku-bg {
   position: absolute;
-  font-size: 200px;
+  font-size: 80px;
   font-weight: 900;
   color: rgba(255, 255, 255, 0.9);
   text-shadow: 0 0 30px rgba(255,255,255,0.5), 0 0 10px rgba(0,0,0,0.8);
   white-space: nowrap;
-  letter-spacing: -10px;
+  letter-spacing: -4px;
   z-index: 1;
   animation: bg-pulse 2s infinite alternate;
 }
@@ -98,31 +148,11 @@
   100% { transform: scale(1.05); opacity: 1; text-shadow: 0 0 50px rgba(255,255,255,1), 0 0 20px rgba(0,0,0,1); }
 }
 
-.vertical-box {
-  position: relative;
-  z-index: 2;
-  border: 4px solid rgba(255,255,255,0.8);
-  padding: 20px 10px;
-  box-shadow: 0 0 15px rgba(255,255,255,0.5), inset 0 0 15px rgba(255,255,255,0.5);
-  background: rgba(0,0,0,0.3);
-  backdrop-filter: blur(2px);
-}
-
-.vertical-text {
-  writing-mode: vertical-rl;
-  text-orientation: upright;
-  font-size: 50px;
-  font-weight: 900;
-  color: white;
-  text-shadow: 2px 2px 4px #000, 0 0 10px #fff;
-  letter-spacing: 5px;
-}
-
 .multiplier-text {
   position: absolute;
   top: 10%;
   right: 10%;
-  font-size: 80px;
+  font-size: 30px;
   font-weight: 900;
   color: #ff3300;
   text-shadow: 
