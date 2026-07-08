@@ -12,6 +12,9 @@ body, html {
   background-color: #111;
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   color: var(--text-light);
+}
+
+.app-container {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -28,6 +31,11 @@ body, html {
   height: 100vh;
   box-sizing: border-box;
   padding-bottom: 240px; /* Space for control panel */
+  transition: padding-bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.layout-wrapper.ui-collapsed {
+  padding-bottom: 40px; /* Space for toggle button only */
 }
 
 /* 筐体全体のコンテナ */
@@ -42,6 +50,11 @@ body, html {
   display: flex;
   justify-content: center;
   align-items: center;
+  transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ui-collapsed .machine-container {
+  max-height: calc(100vh - 100px); /* Expand when UI is hidden */
 }
 
 .machine-frame-overlay {

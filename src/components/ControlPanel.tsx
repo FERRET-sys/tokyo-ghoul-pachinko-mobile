@@ -19,6 +19,8 @@ interface ControlPanelProps {
   toggleAutoLend: () => void;
   earnMoney: (amount: number) => void;
   cashOut: () => void;
+  isCollapsed: boolean;
+  toggleCollapse: () => void;
 }
 
 const BAITO_QUOTES = [
@@ -55,10 +57,11 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   autoLend,
   toggleAutoLend,
   earnMoney,
-  cashOut
+  cashOut,
+  isCollapsed,
+  toggleCollapse
 }) => {
   const [toast, setToast] = React.useState<string | null>(null);
-  const [isCollapsed, setIsCollapsed] = React.useState(false);
 
   const speedLabel = speedMode === 2 ? '超倍速' : speedMode === 1 ? '倍速' : '通常速度';
   const speedColor = speedMode === 2 ? '#ff0000' : speedMode === 1 ? '#ffa500' : '#888';
@@ -72,7 +75,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
 
   return (
     <div className={`control-panel ${isCollapsed ? 'collapsed' : ''}`}>
-      <div className="collapse-toggle" onClick={() => setIsCollapsed(!isCollapsed)}>
+      <div className="collapse-toggle" onClick={toggleCollapse}>
         {isCollapsed ? '▲ MENU ▲' : '▼ CLOSE ▼'}
       </div>
       <div className="data-counter">

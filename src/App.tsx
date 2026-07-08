@@ -37,9 +37,10 @@ function App() {
   } = usePachinko();
 
   const [showTestMenu, setShowTestMenu] = React.useState(false);
+  const [isUICollapsed, setIsUICollapsed] = React.useState(false);
 
   return (
-    <div className="layout-wrapper">
+    <div className={`layout-wrapper ${isUICollapsed ? 'ui-collapsed' : ''}`}>
       <div className="machine-container">
         <img src="/frame.png" className="machine-frame-overlay" alt="frame" />
         
@@ -116,6 +117,8 @@ function App() {
         toggleAutoLend={toggleAutoLend}
         earnMoney={earnMoney}
         cashOut={cashOut}
+        isCollapsed={isUICollapsed}
+        toggleCollapse={() => setIsUICollapsed(!isUICollapsed)}
       />
     </div>
   );
