@@ -58,6 +58,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   cashOut
 }) => {
   const [toast, setToast] = React.useState<string | null>(null);
+  const [isCollapsed, setIsCollapsed] = React.useState(false);
 
   const speedLabel = speedMode === 2 ? '超倍速' : speedMode === 1 ? '倍速' : '通常速度';
   const speedColor = speedMode === 2 ? '#ff0000' : speedMode === 1 ? '#ffa500' : '#888';
@@ -70,7 +71,10 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   };
 
   return (
-    <div className="control-panel">
+    <div className={`control-panel ${isCollapsed ? 'collapsed' : ''}`}>
+      <div className="collapse-toggle" onClick={() => setIsCollapsed(!isCollapsed)}>
+        {isCollapsed ? '▲ MENU ▲' : '▼ CLOSE ▼'}
+      </div>
       <div className="data-counter">
         <div className="data-item">
           <span className="data-label">所持金</span>

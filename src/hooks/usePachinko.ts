@@ -238,8 +238,10 @@ export function usePachinko() {
           setTimeout(() => {
             setBalls((prev) => prev + (nextWinInfo?.payout || 0));
             setTotalPayout((prev) => prev + (nextWinInfo?.payout || 0));
+            setSpins(0); // 小当り(チャージ)で回転数リセット
             setSubState('IDLE');
             setWinInfo(null);
+            setIsReadyForNextSpin(true); // フリーズバグ修正
             if (savedSpeedModeRef.current !== null) {
               setSpeedMode(savedSpeedModeRef.current);
               savedSpeedModeRef.current = null;
@@ -358,8 +360,10 @@ export function usePachinko() {
       setTimeout(() => {
         setBalls((prev) => prev + win.payout);
         setTotalPayout((prev) => prev + win.payout);
+        setSpins(0);
         setSubState('IDLE');
         setWinInfo(null);
+        setIsReadyForNextSpin(true);
         if (savedSpeedModeRef.current !== null) {
           setSpeedMode(savedSpeedModeRef.current);
           savedSpeedModeRef.current = null;
